@@ -1,0 +1,23 @@
+[
+  {
+    "prefix": "week-",
+    "slug": "cloud-engineering",
+    "title": "Cloud Engineering",
+    "description": "A 10-week concept-first path across cloud, networking, compute, storage, security, IaC, CI/CD, and reliability.",
+    "order": 1
+  },
+  {
+    "prefix": "auth-",
+    "slug": "auth-engineering",
+    "title": "Authentication & Authorization",
+    "description": "Identity, sessions, tokens, OAuth 2.0 / OIDC, and authorization models (RBAC, ABAC, policy engines) for backend engineers.",
+    "order": 2
+  },
+  {
+    "prefix": "db-",
+    "slug": "database-engineering",
+    "title": "Database Engineering",
+    "description": "Relational modeling, indexes and query performance, transactions and concurrency, and migrations and operations on PostgreSQL.",
+    "order": 3
+  }
+]

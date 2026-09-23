@@ -1,0 +1,532 @@
+{
+  "week-01-cloud-foundations": [
+    {
+      "prompt": "Which model gives you the most control over the operating system while the provider still manages the physical hardware?",
+      "options": ["SaaS", "PaaS", "IaaS", "FaaS"],
+      "correctIndex": 2,
+      "explanation": "IaaS provides virtualized compute/storage/network; you manage the OS and up."
+    },
+    {
+      "prompt": "In the shared responsibility model, who is responsible for patching the guest OS on a virtual machine you launched?",
+      "options": ["The cloud provider", "You, the customer", "Nobody", "The hardware vendor"],
+      "correctIndex": 1,
+      "explanation": "Security 'in' the cloud (guest OS, apps, data) is the customer's responsibility."
+    },
+    {
+      "prompt": "Why deploy a workload across multiple availability zones?",
+      "options": [
+        "To reduce cost",
+        "To survive the failure of a single data center",
+        "To avoid using IAM",
+        "To make the app single-threaded"
+      ],
+      "correctIndex": 1,
+      "explanation": "AZs are isolated failure domains within a region."
+    }
+  ],
+  "week-02-linux-and-networking": [
+    {
+      "prompt": "How many IP addresses are in a single /25 subnet?",
+      "options": ["64", "128", "256", "512"],
+      "correctIndex": 1,
+      "explanation": "A /25 leaves 7 host bits, so 2^7 = 128 addresses."
+    },
+    {
+      "prompt": "A security group acts as what?",
+      "options": [
+        "A DNS resolver",
+        "A virtual firewall controlling inbound/outbound traffic to a resource",
+        "A load balancer",
+        "A backup schedule"
+      ],
+      "correctIndex": 1,
+      "explanation": "Security groups filter traffic to and from resources like a stateful firewall."
+    },
+    {
+      "prompt": "Why does HTTPS use TLS?",
+      "options": [
+        "To compress responses",
+        "To encrypt and authenticate the connection",
+        "To cache pages",
+        "To assign IP addresses"
+      ],
+      "correctIndex": 1,
+      "explanation": "TLS provides confidentiality and server authentication for HTTP."
+    }
+  ],
+  "week-03-compute": [
+    {
+      "prompt": "Which compute option has the least operational overhead and can scale to zero?",
+      "options": ["A virtual machine", "A container on a VM", "A serverless function", "A bare-metal server"],
+      "correctIndex": 2,
+      "explanation": "Serverless functions run on demand and require no server management."
+    },
+    {
+      "prompt": "What does an application load balancer primarily do?",
+      "options": [
+        "Store files",
+        "Distribute incoming traffic across multiple instances",
+        "Encrypt the database",
+        "Generate IaC"
+      ],
+      "correctIndex": 1,
+      "explanation": "It spreads requests across healthy targets, aiding availability and scale."
+    },
+    {
+      "prompt": "Autoscaling primarily improves which two things?",
+      "options": [
+        "Security and encryption",
+        "Availability and cost control",
+        "Latency and color",
+        "Backups and DNS"
+      ],
+      "correctIndex": 1,
+      "explanation": "It adds capacity under load and removes it when idle."
+    }
+  ],
+  "week-04-storage-and-databases": [
+    {
+      "prompt": "Which storage type best fits user-uploaded photos?",
+      "options": ["Block storage", "Object storage", "A single VM disk", "A message queue"],
+      "correctIndex": 1,
+      "explanation": "Object storage (e.g. S3) suits large, independent, web-accessible blobs."
+    },
+    {
+      "prompt": "Durability refers to what?",
+      "options": [
+        "How fast a query runs",
+        "Not losing stored data over time",
+        "How reachable the service is right now",
+        "How cheap the storage is"
+      ],
+      "correctIndex": 1,
+      "explanation": "Durability is about data not being lost; availability is about being reachable."
+    },
+    {
+      "prompt": "Compared with relational databases, NoSQL stores typically favor?",
+      "options": [
+        "Rich multi-table joins",
+        "Flexible schema and horizontal scale",
+        "Strict foreign keys",
+        "SQL-only access"
+      ],
+      "correctIndex": 1,
+      "explanation": "Many NoSQL stores trade joins/strict schema for scale and flexibility."
+    }
+  ],
+  "week-05-identity-and-security": [
+    {
+      "prompt": "Least privilege means what?",
+      "options": [
+        "Give everyone admin to move fast",
+        "Grant only the permissions needed for the task",
+        "Disable logging",
+        "Share one root account"
+      ],
+      "correctIndex": 1,
+      "explanation": "Minimize granted permissions to reduce blast radius."
+    },
+    {
+      "prompt": "In IAM terms, a policy is?",
+      "options": [
+        "A person",
+        "A document defining allowed actions on resources",
+        "A network route",
+        "An audit log entry"
+      ],
+      "correctIndex": 1,
+      "explanation": "A policy states which actions are allowed or denied on which resources."
+    },
+    {
+      "prompt": "Why minimize long-term credentials?",
+      "options": [
+        "They are slower",
+        "If leaked they stay valid indefinitely; short-lived credentials limit exposure",
+        "They cannot be logged",
+        "They break DNS"
+      ],
+      "correctIndex": 1,
+      "explanation": "Prefer short-lived, rotated credentials over standing secrets."
+    }
+  ],
+  "week-06-infrastructure-as-code": [
+    {
+      "prompt": "What is the correct Terraform workflow order?",
+      "options": [
+        "plan, init, apply, destroy",
+        "init, plan, apply, destroy",
+        "apply, plan, init, destroy",
+        "init, apply, plan, destroy"
+      ],
+      "correctIndex": 1,
+      "explanation": "You init a working directory, plan the changes, apply them, and destroy when done."
+    },
+    {
+      "prompt": "What does `terraform plan` do?",
+      "options": [
+        "Provisions resources immediately",
+        "Shows the proposed changes before applying",
+        "Deletes all resources",
+        "Formats the code"
+      ],
+      "correctIndex": 1,
+      "explanation": "plan is a dry run showing what apply would change."
+    },
+    {
+      "prompt": "IaC improves which of these most directly?",
+      "options": [
+        "Font rendering",
+        "Repeatability, review, and rollback of infrastructure",
+        "Database indexing",
+        "Password hashing"
+      ],
+      "correctIndex": 1,
+      "explanation": "Declarative, versioned infra is repeatable and reviewable."
+    }
+  ],
+  "week-07-ci-cd-and-deployment": [
+    {
+      "prompt": "A blue/green deployment works how?",
+      "options": [
+        "Upgrades every server at once",
+        "Runs two environments and switches traffic, enabling fast rollback",
+        "Only deploys on Fridays",
+        "Skips testing"
+      ],
+      "correctIndex": 1,
+      "explanation": "Traffic cuts over to the new environment; rollback is switching back."
+    },
+    {
+      "prompt": "A canary release means?",
+      "options": [
+        "Deploy to a small subset of users first",
+        "Deploy to everyone immediately",
+        "Never deploy",
+        "Roll back automatically every time"
+      ],
+      "correctIndex": 0,
+      "explanation": "Canary exposes a small slice first to catch problems early."
+    },
+    {
+      "prompt": "Continuous Integration primarily automates what?",
+      "options": [
+        "Building and testing on every push",
+        "Writing the code for you",
+        "Provisioning DNS",
+        "Encrypting disks"
+      ],
+      "correctIndex": 0,
+      "explanation": "CI builds and runs tests automatically as changes land."
+    }
+  ],
+  "week-08-monitoring-and-reliability": [
+    {
+      "prompt": "What are the four golden signals?",
+      "options": [
+        "CPU, RAM, disk, network",
+        "Latency, traffic, errors, saturation",
+        "Logs, metrics, traces, alerts",
+        "Cost, speed, size, color"
+      ],
+      "correctIndex": 1,
+      "explanation": "The golden signals are latency, traffic, errors, and saturation."
+    },
+    {
+      "prompt": "An SLO is?",
+      "options": [
+        "A raw log line",
+        "A target for a service-level indicator, e.g. 99.9% success over 28 days",
+        "A type of index",
+        "A deployment tool"
+      ],
+      "correctIndex": 1,
+      "explanation": "An SLO sets the objective an SLI must meet."
+    },
+    {
+      "prompt": "Why is 'more metrics' not the same as better observability?",
+      "options": [
+        "Metrics are always free",
+        "Observability needs the right signals and context, not just volume",
+        "Metrics slow the app",
+        "You can never have too many"
+      ],
+      "correctIndex": 1,
+      "explanation": "Useful observability is about relevant signals you can act on."
+    }
+  ],
+  "week-09-cost-and-architecture": [
+    {
+      "prompt": "Rightsizing means?",
+      "options": [
+        "Always buying the largest instance",
+        "Matching resource size to actual demand",
+        "Turning off logging",
+        "Using only one region"
+      ],
+      "correctIndex": 1,
+      "explanation": "Rightsizing fits capacity to real usage to cut waste."
+    },
+    {
+      "prompt": "The Well-Architected pillars ask you to weigh cost against what else?",
+      "options": [
+        "Nothing; only cost matters",
+        "Reliability, security, performance, and operations",
+        "Only performance",
+        "Only security"
+      ],
+      "correctIndex": 1,
+      "explanation": "Cost is one pillar among several to balance."
+    },
+    {
+      "prompt": "Why can 'cheap now' differ from 'cost-effective over time'?",
+      "options": [
+        "Prices never change",
+        "A cheaper option can carry higher operational or scaling costs later",
+        "Time does not affect cost",
+        "Managed services are always cheapest"
+      ],
+      "correctIndex": 1,
+      "explanation": "Total cost of ownership includes ops, maintenance, and scaling, not just sticker price."
+    }
+  ],
+  "auth-01-authentication-basics": [
+    {
+      "prompt": "Authentication answers which question?",
+      "options": ["What may you do?", "Who are you?", "Where are you?", "How fast are you?"],
+      "correctIndex": 1,
+      "explanation": "Authentication establishes identity; authorization decides what that identity may do."
+    },
+    {
+      "prompt": "Why is bcrypt or argon2 preferred over SHA-256 for storing passwords?",
+      "options": [
+        "It produces shorter hashes",
+        "It is deliberately slow, resisting brute-force",
+        "It is reversible when needed",
+        "It does not need a salt"
+      ],
+      "correctIndex": 1,
+      "explanation": "Password hashes should be slow and salted to make brute-force expensive."
+    },
+    {
+      "prompt": "What does adding a per-user salt to a password hash prevent?",
+      "options": [
+        "Network sniffing",
+        "Precomputed rainbow-table attacks",
+        "SQL injection",
+        "Expired sessions"
+      ],
+      "correctIndex": 1,
+      "explanation": "A unique salt makes identical passwords hash differently, defeating precomputed tables."
+    }
+  ],
+  "auth-02-sessions-and-tokens": [
+    {
+      "prompt": "Where should a browser SPA keep its session token to reduce XSS theft risk?",
+      "options": ["localStorage", "An HttpOnly cookie", "A JS variable", "The URL"],
+      "correctIndex": 1,
+      "explanation": "HttpOnly cookies are not readable by JavaScript, reducing XSS token theft."
+    },
+    {
+      "prompt": "A stateless JWT is hard to do what before it expires?",
+      "options": ["Sign", "Revoke", "Decode", "Send"],
+      "correctIndex": 1,
+      "explanation": "Because the server keeps no session state, revoking a valid JWT early needs extra machinery (denylist, short TTL)."
+    },
+    {
+      "prompt": "For a cookie shared between an SPA and an API on different domains, which flags are required?",
+      "options": [
+        "SameSite=Strict; Secure",
+        "SameSite=None; Secure",
+        "HttpOnly only",
+        "Domain=localhost"
+      ],
+      "correctIndex": 1,
+      "explanation": "Cross-site cookies must be SameSite=None and Secure to be sent."
+    }
+  ],
+  "auth-03-oauth-and-oidc": [
+    {
+      "prompt": "In OAuth 2.0, which party is the 'client'?",
+      "options": [
+        "The user",
+        "The application requesting access",
+        "The database",
+        "The browser vendor"
+      ],
+      "correctIndex": 1,
+      "explanation": "The client is the app acting on the resource owner's behalf."
+    },
+    {
+      "prompt": "Which token tells you who the authenticated user is?",
+      "options": ["The access token", "The OIDC ID token", "The refresh token", "The CSRF token"],
+      "correctIndex": 1,
+      "explanation": "OIDC adds the ID token, an identity assertion; the access token authorizes API calls."
+    },
+    {
+      "prompt": "What is the OAuth 'state' parameter primarily for?",
+      "options": [
+        "Caching",
+        "CSRF protection on the redirect",
+        "Storing the password",
+        "Rate limiting"
+      ],
+      "correctIndex": 1,
+      "explanation": "state ties the callback to the request that started it, preventing CSRF."
+    }
+  ],
+  "auth-04-authorization-models": [
+    {
+      "prompt": "RBAC grants permissions based on what?",
+      "options": ["User attributes", "Assigned roles", "Relationships", "Time of day"],
+      "correctIndex": 1,
+      "explanation": "Role-based access control assigns permissions to roles, and roles to users."
+    },
+    {
+      "prompt": "In a tenant tree, an Admin grant at the account root should apply to what?",
+      "options": [
+        "Only the root",
+        "The root and every descendant compartment",
+        "Only sibling accounts",
+        "Nothing until re-granted"
+      ],
+      "correctIndex": 1,
+      "explanation": "Grants project down the hierarchy to descendants."
+    },
+    {
+      "prompt": "When a read is row-level authorized and the user lacks a grant, a good API returns what?",
+      "options": [
+        "A 500 error",
+        "An empty list rather than a 403",
+        "The full data",
+        "A redirect"
+      ],
+      "correctIndex": 1,
+      "explanation": "Row-level filtering returns only permitted rows, so a missing grant looks like no data."
+    }
+  ],
+  "db-01-relational-modeling": [
+    {
+      "prompt": "A many-to-many relationship is implemented with what?",
+      "options": ["A single foreign key", "A join table", "An index", "A trigger"],
+      "correctIndex": 1,
+      "explanation": "A join table holds foreign keys to both sides."
+    },
+    {
+      "prompt": "A unique constraint on (userId, lessonId) in LessonProgress prevents what?",
+      "options": [
+        "Slow reads",
+        "A user completing the same lesson twice as two rows",
+        "Foreign key errors",
+        "Deletes"
+      ],
+      "correctIndex": 1,
+      "explanation": "It enforces one progress row per user per lesson."
+    },
+    {
+      "prompt": "A foreign key guarantees what?",
+      "options": [
+        "The referenced row exists",
+        "The column is indexed for reads",
+        "The value is encrypted",
+        "The table is normalized"
+      ],
+      "correctIndex": 0,
+      "explanation": "Referential integrity: you cannot reference a row that does not exist."
+    }
+  ],
+  "db-02-indexes-and-query-performance": [
+    {
+      "prompt": "An index primarily speeds up which operation, at the cost of which?",
+      "options": [
+        "Writes, at the cost of reads",
+        "Reads, at the cost of write/storage overhead",
+        "Both equally",
+        "Neither"
+      ],
+      "correctIndex": 1,
+      "explanation": "Indexes accelerate lookups but must be maintained on every write."
+    },
+    {
+      "prompt": "For a filter WHERE userId = ? AND quizId = ?, a composite index (userId, quizId) helps most because?",
+      "options": [
+        "Column order never matters",
+        "The leading column matches the first filter, narrowing the search",
+        "It uses less disk than a single-column index",
+        "It avoids a primary key"
+      ],
+      "correctIndex": 1,
+      "explanation": "Composite indexes are used left-to-right; the leading column must match a predicate."
+    },
+    {
+      "prompt": "The N+1 query problem is best fixed by?",
+      "options": [
+        "Adding more indexes",
+        "Fetching related data in one query/join instead of one per row",
+        "Caching the connection",
+        "Disabling the ORM"
+      ],
+      "correctIndex": 1,
+      "explanation": "Replace N per-row queries with a single set-based query."
+    }
+  ],
+  "db-03-transactions-and-concurrency": [
+    {
+      "prompt": "Atomicity guarantees what when a transaction fails halfway?",
+      "options": [
+        "Partial writes remain",
+        "All of its writes are rolled back",
+        "The database restarts",
+        "Reads are blocked forever"
+      ],
+      "correctIndex": 1,
+      "explanation": "Atomic = all-or-nothing; a failed transaction leaves no partial state."
+    },
+    {
+      "prompt": "A version-column compare-and-swap prevents which problem?",
+      "options": ["Deadlock", "Lost update", "Slow reads", "Connection exhaustion"],
+      "correctIndex": 1,
+      "explanation": "Writing only if the version is unchanged stops a concurrent overwrite."
+    },
+    {
+      "prompt": "Which isolation level prevents the most anomalies?",
+      "options": ["Read uncommitted", "Read committed", "Repeatable read", "Serializable"],
+      "correctIndex": 3,
+      "explanation": "Serializable behaves as if transactions ran one at a time."
+    }
+  ],
+  "db-04-migrations-and-operations": [
+    {
+      "prompt": "What makes a migration idempotent?",
+      "options": [
+        "It runs faster",
+        "Re-running it produces the same result without error",
+        "It never touches indexes",
+        "It requires no lock"
+      ],
+      "correctIndex": 1,
+      "explanation": "Guards like IF NOT EXISTS let a migration re-run safely."
+    },
+    {
+      "prompt": "Why serialize migrations across concurrent app instances with an advisory lock?",
+      "options": [
+        "To speed up boot",
+        "So exactly one instance runs the batch and they do not race",
+        "To avoid indexes",
+        "To skip backups"
+      ],
+      "correctIndex": 1,
+      "explanation": "A lock ensures one runner applies the migrations while others wait."
+    },
+    {
+      "prompt": "Why does serverless Postgres need a connection pooler?",
+      "options": [
+        "To encrypt traffic",
+        "Because many short-lived functions would otherwise exhaust direct connections",
+        "To generate migrations",
+        "To store sessions"
+      ],
+      "correctIndex": 1,
+      "explanation": "Pooling multiplexes many clients onto few database connections."
+    }
+  ]
+}

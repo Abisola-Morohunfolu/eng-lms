@@ -1,0 +1,133 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  googleId  String   @unique
+  email     String   @unique
+  name      String?
+  avatarUrl String?
+  createdAt DateTime @default(now())
+
+  lessonProgress    LessonProgress[]
+  quizAttempts      QuizAttempt[]
+  checklistProgress ChecklistProgress[]
+}
+
+model Track {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  title       String
+  description String?
+  order       Int      @default(0)
+
+  modules Module[]
+}
+
+model Module {
+  id      String  @id @default(cuid())
+  track   Track   @relation(fields: [trackId], references: [id], onDelete: Cascade)
+  trackId String
+  slug    String  @unique
+  title   String
+  summary String?
+  order   Int     @default(0)
+
+  lessons        Lesson[]
+  quiz           Quiz?
+  checklistItems ChecklistItem[]
+
+  @@index([trackId])
+}
+
+model Lesson {
+  id              String @id @default(cuid())
+  module          Module @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  moduleId        String
+  slug            String @unique
+  title           String
+  contentMarkdown String
+  order           Int    @default(0)
+
+  progress LessonProgress[]
+
+  @@index([moduleId])
+}
+
+model Quiz {
+  id       String @id @default(cuid())
+  module   Module @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  moduleId String @unique
+
+  questions QuizQuestion[]
+  attempts  QuizAttempt[]
+}
+
+model QuizQuestion {
+  id           String   @id @default(cuid())
+  quiz         Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  quizId       String
+  prompt       String
+  options      String[]
+  correctIndex Int
+  explanation  String?
+  order        Int      @default(0)
+
+  @@index([quizId])
+}
+
+model ChecklistItem {
+  id       String @id @default(cuid())
+  module   Module @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  moduleId String
+  label    String
+  order    Int    @default(0)
+
+  progress ChecklistProgress[]
+
+  @@index([moduleId])
+}
+
+model LessonProgress {
+  id          String   @id @default(cuid())
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId      String
+  lesson      Lesson   @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  lessonId    String
+  completedAt DateTime @default(now())
+
+  @@unique([userId, lessonId])
+  @@index([userId])
+}
+
+model QuizAttempt {
+  id          String   @id @default(cuid())
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId      String
+  quiz        Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  quizId      String
+  score       Int
+  total       Int
+  answers     Json
+  submittedAt DateTime @default(now())
+
+  @@index([userId, quizId])
+}
+
+model ChecklistProgress {
+  id              String        @id @default(cuid())
+  user            User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId          String
+  checklistItem   ChecklistItem @relation(fields: [checklistItemId], references: [id], onDelete: Cascade)
+  checklistItemId String
+  checkedAt       DateTime      @default(now())
+
+  @@unique([userId, checklistItemId])
+  @@index([userId])
+}
