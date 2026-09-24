@@ -4,6 +4,9 @@
   "description": "Engineering Domain Academy API (NestJS)",
   "private": true,
   "license": "UNLICENSED",
+  "engines": {
+    "node": ">=20.0.0 <25.0.0"
+  },
   "scripts": {
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\"",
