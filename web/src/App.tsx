@@ -1,50 +1,72 @@
-import { useEffect, useState } from 'react';
-import { api, googleLoginUrl } from './api/client';
+import { BrowserRouter, Navigate, Route, Routes, useLocation } from 'react-router-dom';
+import type { ReactNode } from 'react';
+import { AuthProvider, useAuth } from './auth/AuthContext';
+import { Footer } from './components/Footer';
+import { Nav } from './components/Nav';
+import { Dashboard } from './pages/Dashboard';
+import { Home } from './pages/Home';
+import { Login } from './pages/Login';
+import { Module } from './pages/Module';
+import { Progress } from './pages/Progress';
 
-type Health = { status: string; service: string; time: string };
+function RequireAuth({ children }: { children: ReactNode }) {
+  const { user, loading } = useAuth();
+  const location = useLocation();
+  if (loading) {
+    return <p className="wrap py-24 text-center text-ink/60">Loading…</p>;
+  }
+  if (!user) {
+    return <Navigate to="/login" state={{ from: location }} replace />;
+  }
+  return <>{children}</>;
+}
+
+function Layout() {
+  return (
+    <div className="flex min-h-screen flex-col">
+      <Nav />
+      <main className="flex-1">
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/login" element={<Login />} />
+          <Route
+            path="/dashboard"
+            element={
+              <RequireAuth>
+                <Dashboard />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/modules/:slug"
+            element={
+              <RequireAuth>
+                <Module />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/progress"
+            element={
+              <RequireAuth>
+                <Progress />
+              </RequireAuth>
+            }
+          />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </main>
+      <Footer />
+    </div>
+  );
+}
 
 export function App() {
-  const [health, setHealth] = useState<Health | null>(null);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    api<Health>('/health')
-      .then(setHealth)
-      .catch((e: Error) => setError(e.message));
-  }, []);
-
   return (
-    <main
-      style={{
-        fontFamily: 'ui-serif, Georgia, serif',
-        maxWidth: 420,
-        margin: '12vh auto',
-        padding: '0 20px',
-        color: '#111827',
-      }}
-    >
-      <h1 style={{ fontSize: 22 }}>Engineering Domain Academy</h1>
-      <p style={{ color: '#6b7280' }}>Sign in to continue your track.</p>
-
-      <a
-        href={googleLoginUrl}
-        style={{
-          display: 'inline-block',
-          marginTop: 16,
-          padding: '10px 16px',
-          background: '#111827',
-          color: '#fff',
-          borderRadius: 8,
-          textDecoration: 'none',
-        }}
-      >
-        Sign in with Google
-      </a>
-
-      <p style={{ marginTop: 40, fontSize: 12, color: '#9ca3af' }}>
-        API:{' '}
-        {error ? `unreachable (${error})` : health ? `${health.status} @ ${health.service}` : 'checking…'}
-      </p>
-    </main>
+    <BrowserRouter>
+      <AuthProvider>
+        <Layout />
+      </AuthProvider>
+    </BrowserRouter>
   );
 }
