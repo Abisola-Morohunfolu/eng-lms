@@ -72,3 +72,41 @@ export interface Lesson {
   moduleId: string;
   contentMarkdown: string;
 }
+
+export interface QuizAttemptResult {
+  score: number;
+  total: number;
+  correct: boolean[];
+}
+
+export interface ModuleProgress {
+  completedLessonIds: string[];
+  checkedChecklistItemIds: string[];
+  quizBestScore: number | null;
+  quizAttemptCount: number;
+}
+
+export interface ProgressModule {
+  moduleId: string;
+  slug: string;
+  title: string;
+  trackSlug: string;
+  lessonsDone: number;
+  lessonsTotal: number;
+  quizBestScore: number | null;
+  quizAttempts: number;
+  checklistDone: number;
+  checklistTotal: number;
+  percent: number;
+}
+
+export interface ProgressTrack {
+  slug: string;
+  title: string;
+  percent: number;
+}
+
+export interface ProgressResponse {
+  tracks: ProgressTrack[];
+  modules: ProgressModule[];
+}

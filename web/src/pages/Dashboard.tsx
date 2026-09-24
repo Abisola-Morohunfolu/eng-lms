@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { api } from '../api/client';
-import type { Track, TrackDetail } from '../api/types';
+import type { ProgressResponse, Track, TrackDetail } from '../api/types';
 import { ProgressBar } from '../components/ProgressBar';
 import { TrackIcon } from '../components/icons';
 
@@ -14,13 +14,17 @@ const tones: Record<string, string> = {
 export function Dashboard() {
   const [tracks, setTracks] = useState<Track[]>([]);
   const [details, setDetails] = useState<Record<string, TrackDetail>>({});
+  const [percent, setPercent] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    api<Track[]>('/tracks')
-      .then(async (list) => {
+    Promise.all([api<Track[]>('/tracks'), api<ProgressResponse>('/me/progress')])
+      .then(async ([list, progress]) => {
         setTracks(list);
+        setPercent(
+          Object.fromEntries(progress.modules.map((m) => [m.slug, m.percent])),
+        );
         const entries = await Promise.all(
           list.map((t) =>
             api<TrackDetail>(`/tracks/${t.slug}`).then((d) => [t.slug, d] as const),
@@ -72,7 +76,7 @@ export function Dashboard() {
                 <h3 className="font-display text-lg font-bold leading-snug">{m.title}</h3>
                 {m.summary && <p className="text-sm leading-relaxed text-ink/70">{m.summary}</p>}
                 <div className="mt-auto pt-2">
-                  <ProgressBar value={0} />
+                  <ProgressBar value={percent[m.slug] ?? 0} />
                 </div>
               </Link>
             ))}
