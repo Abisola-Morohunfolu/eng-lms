@@ -8,3 +8,4 @@
 
 # Prisma generated client
 /prisma/generated
+/src/generated
