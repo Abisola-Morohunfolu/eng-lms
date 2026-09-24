@@ -5,6 +5,7 @@ import { PrismaModule } from "./common/prisma.module";
 import { ContentModule } from "./content/content.module";
 import { HealthController } from "./health/health.controller";
 import { ProgressModule } from "./progress/progress.module";
+import { SeedModule } from "./seed/seed.module";
 
 @Module({
   imports: [
@@ -13,6 +14,7 @@ import { ProgressModule } from "./progress/progress.module";
     AuthModule,
     ContentModule,
     ProgressModule,
+    SeedModule,
   ],
   controllers: [HealthController],
 })

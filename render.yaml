@@ -1,0 +1,28 @@
+services:
+  - type: web
+    name: eda-api
+    runtime: node
+    rootDir: api
+    plan: free
+    healthCheckPath: /health
+    buildCommand: npm install --include=dev && npm run build
+    startCommand: npm run prisma:deploy && npm run start:prod
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        sync: false
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+      - key: GOOGLE_CALLBACK_URL
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: POST_LOGIN_REDIRECT
+        sync: false
+      - key: WEB_ORIGIN
+        sync: false
+      - key: SEED_ON_BOOT
+        value: "true"
