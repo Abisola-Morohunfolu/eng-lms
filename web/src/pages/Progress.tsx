@@ -1,30 +1,13 @@
-import { useEffect, useState } from 'react';
-import { api } from '../api/client';
-import type { ProgressResponse } from '../api/types';
+import { ModuleCardShell } from '../components/ModuleCardShell';
 import { ProgressBar } from '../components/ProgressBar';
-
-const tones: Record<string, string> = {
-  'cloud-engineering': 'bg-mist',
-  'auth-engineering': 'bg-blush',
-  'database-engineering': 'bg-leaf',
-};
+import { Status } from '../components/Status';
+import { useGetProgress } from '../hooks/progress';
 
 export function Progress() {
-  const [progress, setProgress] = useState<ProgressResponse | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const { data: progress, isPending, isError } = useGetProgress();
 
-  useEffect(() => {
-    api<ProgressResponse>('/me/progress')
-      .then(setProgress)
-      .catch((e: Error) => setError(e.message));
-  }, []);
-
-  if (error) {
-    return <p className="wrap py-24 text-center text-ink/60">Couldn’t load progress ({error}).</p>;
-  }
-  if (!progress) {
-    return <p className="wrap py-24 text-center text-ink/60">Loading progress…</p>;
-  }
+  if (isPending) return <Status message="Loading progress…" />;
+  if (isError || !progress) return <Status message="Couldn’t load progress." />;
 
   return (
     <div className="wrap flex flex-col gap-12 py-12 md:py-16">
@@ -47,10 +30,7 @@ export function Progress() {
             {progress.modules
               .filter((m) => m.trackSlug === track.slug)
               .map((m) => (
-                <div
-                  key={m.slug}
-                  className={`flex flex-col gap-3 rounded-card p-5 shadow-hard ${tones[track.slug] ?? 'bg-mist'}`}
-                >
+                <ModuleCardShell key={m.slug} slug={track.slug}>
                   <h3 className="font-display text-lg font-bold leading-snug">{m.title}</h3>
                   <ProgressBar value={m.percent} />
                   <dl className="flex flex-col gap-1 text-sm text-ink/70">
@@ -73,7 +53,7 @@ export function Progress() {
                       </dd>
                     </div>
                   </dl>
-                </div>
+                </ModuleCardShell>
               ))}
           </div>
         </section>

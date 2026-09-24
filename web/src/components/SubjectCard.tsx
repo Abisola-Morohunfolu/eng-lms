@@ -1,15 +1,10 @@
 import { Link } from 'react-router-dom';
 import type { Track } from '../api/types';
 import { TrackIcon } from './icons';
-
-const tones: Record<string, string> = {
-  'cloud-engineering': 'bg-mist',
-  'auth-engineering': 'bg-blush',
-  'database-engineering': 'bg-leaf',
-};
+import { toneFor } from './tones';
 
 export function SubjectCard({ track }: { track: Track }) {
-  const tone = tones[track.slug] ?? 'bg-mist';
+  const tone = toneFor(track.slug);
   return (
     <Link
       to="/dashboard"
