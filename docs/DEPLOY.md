@@ -9,7 +9,7 @@ You need these values before starting (all places are marked with `<...>` placeh
 - `<DATABASE_URL>` — Neon connection string (same as local, or a fresh Neon branch for prod).
 - `<service-name>` — your Render web service name (e.g. `eda-api`), which determines the API URL
   `https://<service-name>.onrender.com`.
-- `<pages-domain>` — your Cloudflare Pages domain (e.g. `eda.pages.dev` or a custom domain).
+- `eng-lms.pages.dev` — your Cloudflare Pages domain (e.g. `eda.pages.dev` or a custom domain).
 - `<google-client-id>` / `<google-client-secret>` — your Google OAuth client credentials.
 
 ## Database — Neon
