@@ -8,7 +8,7 @@
     "node": ">=20.0.0 <25.0.0"
   },
   "scripts": {
-    "build": "nest build",
+    "build": "nest build && cp -R src/generated dist/src/generated",
     "format": "prettier --write \"src/**/*.ts\"",
     "start": "nest start",
     "start:dev": "nest start --watch",
