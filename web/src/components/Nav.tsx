@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { useAuth } from '../auth/AuthContext';
+import { useAuth } from '../auth/useAuth';
+import { Button } from './Button';
 
 const links = [
   { to: '/', label: 'Home' },
@@ -16,7 +17,7 @@ export function Nav() {
     <header className="sticky top-0 z-50 border-b border-ink/10 bg-paper/90 backdrop-blur">
       <nav className="wrap flex h-16 items-center justify-between">
         <Link to="/" className="font-display text-lg font-bold tracking-tight">
-          Engineering<span className="text-brand"> Domain</span> Academy
+          CDA
         </Link>
 
         <div className="hidden items-center gap-6 md:flex">
@@ -31,9 +32,9 @@ export function Nav() {
           {user ? (
             <>
               <span className="text-sm text-ink/60">{user.name ?? user.email}</span>
-              <button onClick={() => void logout()} className="btn btn--secondary btn--sm">
+              <Button variant="secondary" size="sm" onClick={logout}>
                 Sign out
-              </button>
+              </Button>
             </>
           ) : (
             <Link to="/login" className="btn btn--primary btn--sm">
@@ -69,7 +70,7 @@ export function Nav() {
             ))}
             {user ? (
               <button
-                onClick={() => void logout()}
+                onClick={logout}
                 className="rounded-card px-3 py-2 text-left text-sm font-medium hover:bg-beige"
               >
                 Sign out

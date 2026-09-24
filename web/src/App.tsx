@@ -1,8 +1,10 @@
 import { BrowserRouter, Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import type { ReactNode } from 'react';
-import { AuthProvider, useAuth } from './auth/AuthContext';
+import { AuthProvider } from './auth/AuthProvider';
+import { useAuth } from './auth/useAuth';
 import { Footer } from './components/Footer';
 import { Nav } from './components/Nav';
+import { Status } from './components/Status';
 import { Dashboard } from './pages/Dashboard';
 import { Home } from './pages/Home';
 import { Login } from './pages/Login';
@@ -13,7 +15,7 @@ function RequireAuth({ children }: { children: ReactNode }) {
   const { user, loading } = useAuth();
   const location = useLocation();
   if (loading) {
-    return <p className="wrap py-24 text-center text-ink/60">Loading…</p>;
+    return <Status message="Loading…" />;
   }
   if (!user) {
     return <Navigate to="/login" state={{ from: location }} replace />;

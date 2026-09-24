@@ -1,127 +1,126 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import Markdown from 'react-markdown';
-import { api } from '../api/client';
-import type {
-  Lesson,
-  ModuleDetail,
-  ModuleProgress,
-  QuizAttemptResult,
-} from '../api/types';
+import type { Quiz } from '../api/types';
+import { Status } from '../components/Status';
+import { useGetLesson, useGetModule } from '../hooks/content';
+import {
+  useCompleteLesson,
+  useGetModuleProgress,
+  useSubmitQuiz,
+  useToggleChecklistItem,
+} from '../hooks/progress';
 
-function post<T>(path: string, body: unknown): Promise<T> {
-  return api<T>(path, { method: 'POST', body: JSON.stringify(body) });
+function QuizSection({
+  quizId,
+  quiz,
+  slug,
+  bestScore,
+}: {
+  quizId: string;
+  quiz: Quiz;
+  slug: string;
+  bestScore: number | null;
+}) {
+  const [selected, setSelected] = useState<(number | null)[]>(
+    Array(quiz.questions.length).fill(null),
+  );
+  const submitQuiz = useSubmitQuiz(quizId, slug);
+  const quizResult = submitQuiz.data;
+  const quizComplete = selected.every((v) => v !== null) && selected.length > 0;
+
+  return (
+    <section className="rounded-card bg-leaf p-6 shadow-hard">
+      <h3 className="font-display text-lg font-bold">Quiz</h3>
+      {bestScore !== null && quizResult === undefined && (
+        <p className="mt-2 text-sm text-ink/70">Best score: {bestScore}%</p>
+      )}
+      <ol className="mt-4 flex flex-col gap-4">
+        {quiz.questions.map((q, qi) => (
+          <li key={q.id} className="text-sm">
+            <p className="font-medium">{q.prompt}</p>
+            <ul className="mt-2 flex flex-col gap-1">
+              {q.options.map((opt, oi) => {
+                const isSelected = selected[qi] === oi;
+                const revealed = quizResult !== undefined;
+                const isCorrect = quizResult !== undefined && quizResult.correct[qi];
+                const wasWrongPick =
+                  quizResult !== undefined && isSelected && !quizResult.correct[qi];
+                return (
+                  <li key={oi}>
+                    <button
+                      onClick={() =>
+                        setSelected((prev) => prev.map((v, i) => (i === qi ? oi : v)))
+                      }
+                      disabled={revealed}
+                      className={`flex w-full items-center gap-2 rounded-md px-3 py-2 text-left transition-colors ${
+                        revealed && isCorrect
+                          ? 'bg-forest/10 ring-1 ring-forest'
+                          : wasWrongPick
+                            ? 'bg-red-100 ring-1 ring-red-400'
+                            : isSelected
+                              ? 'bg-forest text-paper'
+                              : 'bg-paper/60 hover:bg-paper'
+                      }`}
+                    >
+                      <span
+                        className={`h-3.5 w-3.5 shrink-0 rounded-full border-2 ${
+                          isSelected ? 'border-paper' : 'border-ink/30'
+                        }`}
+                      />
+                      {opt}
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+          </li>
+        ))}
+      </ol>
+      {quizResult ? (
+        <div className="mt-4 rounded-md bg-paper/70 p-3 text-sm font-semibold">
+          You scored {quizResult.score} / {quizResult.total} (
+          {Math.round((100 * quizResult.score) / quizResult.total)}%)
+        </div>
+      ) : (
+        <button
+          onClick={() => submitQuiz.mutate(selected.map((v) => v ?? -1))}
+          disabled={!quizComplete || submitQuiz.isPending}
+          className="mt-4 rounded-pill bg-forest px-5 py-2 text-sm font-semibold text-paper transition-colors hover:bg-forest/90 disabled:cursor-not-allowed disabled:opacity-40"
+        >
+          {submitQuiz.isPending ? 'Submitting…' : 'Submit quiz'}
+        </button>
+      )}
+    </section>
+  );
 }
 
 export function Module() {
   const { slug } = useParams<{ slug: string }>();
-  const [module, setModule] = useState<ModuleDetail | null>(null);
+  const moduleQuery = useGetModule(slug);
+  const progressQuery = useGetModuleProgress(slug);
+
   const [lessonSlug, setLessonSlug] = useState<string | null>(null);
-  const [lesson, setLesson] = useState<Lesson | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [lessonError, setLessonError] = useState<string | null>(null);
 
-  const [completedLessonIds, setCompletedLessonIds] = useState<Set<string>>(new Set());
-  const [checkedIds, setCheckedIds] = useState<Set<string>>(new Set());
-  const [bestScore, setBestScore] = useState<number | null>(null);
-  const [selected, setSelected] = useState<(number | null)[]>([]);
-  const [quizResult, setQuizResult] = useState<QuizAttemptResult | null>(null);
-  const [busy, setBusy] = useState<string | null>(null);
+  const module = moduleQuery.data;
+  const progress = progressQuery.data;
+  const activeLessonSlug = lessonSlug ?? module?.lessons[0]?.slug ?? null;
+  const lessonQuery = useGetLesson(activeLessonSlug);
+  const lesson = lessonQuery.data;
 
-  useEffect(() => {
-    if (!slug) return;
-    api<ModuleDetail>(`/modules/${slug}`)
-      .then((m) => {
-        setModule(m);
-        setSelected(new Array(m.quiz?.questions.length ?? 0).fill(null));
-        if (m.lessons[0]) setLessonSlug(m.lessons[0].slug);
-      })
-      .catch((e: Error) => setError(e.message));
-  }, [slug]);
+  const completeLesson = useCompleteLesson(slug ?? '');
+  const toggleChecklist = useToggleChecklistItem(slug ?? '');
 
-  useEffect(() => {
-    if (!slug) return;
-    api<ModuleProgress>(`/modules/${slug}/progress`)
-      .then((p) => {
-        setCompletedLessonIds(new Set(p.completedLessonIds));
-        setCheckedIds(new Set(p.checkedChecklistItemIds));
-        setBestScore(p.quizBestScore);
-      })
-      .catch(() => {});
-  }, [slug]);
-
-  useEffect(() => {
-    if (!lessonSlug) return;
-    setLesson(null);
-    setLessonError(null);
-    api<Lesson>(`/lessons/${lessonSlug}`)
-      .then(setLesson)
-      .catch((e: Error) => setLessonError(e.message));
-  }, [lessonSlug]);
-
+  const completedLessonIds = useMemo(
+    () => new Set(progress?.completedLessonIds ?? []),
+    [progress],
+  );
+  const checkedIds = useMemo(() => new Set(progress?.checkedChecklistItemIds ?? []), [progress]);
+  const bestScore = progress?.quizBestScore ?? null;
   const activeLessonId = lesson?.id;
 
-  const completeLesson = useCallback(async () => {
-    if (!activeLessonId || busy) return;
-    setBusy('lesson');
-    try {
-      await post(`/lessons/${activeLessonId}/complete`, {});
-      setCompletedLessonIds((prev) => new Set(prev).add(activeLessonId));
-    } finally {
-      setBusy(null);
-    }
-  }, [activeLessonId, busy]);
-
-  const toggleChecklist = useCallback(
-    async (itemId: string) => {
-      if (busy) return;
-      setBusy('checklist');
-      try {
-        const res = await post<{ checked: boolean }>(
-          `/checklist-items/${itemId}/toggle`,
-          {},
-        );
-        setCheckedIds((prev) => {
-          const next = new Set(prev);
-          if (res.checked) next.add(itemId);
-          else next.delete(itemId);
-          return next;
-        });
-      } finally {
-        setBusy(null);
-      }
-    },
-    [busy],
-  );
-
-  const submitQuiz = useCallback(async () => {
-    if (!module?.quiz || busy) return;
-    setBusy('quiz');
-    try {
-      const answers = selected.map((v) => v ?? -1);
-      const res = await post<QuizAttemptResult>(
-        `/quizzes/${module.quiz.id}/attempts`,
-        { answers },
-      );
-      setQuizResult(res);
-      const pct = Math.round((100 * res.score) / res.total);
-      setBestScore((prev) => (prev === null ? pct : Math.max(prev, pct)));
-    } finally {
-      setBusy(null);
-    }
-  }, [module, selected, busy]);
-
-  const quizComplete = useMemo(
-    () => selected.every((v) => v !== null) && selected.length > 0,
-    [selected],
-  );
-
-  if (error) {
-    return <p className="wrap py-24 text-center text-ink/60">Couldn’t load module ({error}).</p>;
-  }
-  if (!module) {
-    return <p className="wrap py-24 text-center text-ink/60">Loading module…</p>;
-  }
+  if (moduleQuery.isPending) return <Status message="Loading module…" />;
+  if (moduleQuery.isError || !module) return <Status message="Couldn’t load module." />;
 
   return (
     <div className="wrap flex flex-col gap-8 py-12 md:py-16">
@@ -140,7 +139,7 @@ export function Module() {
           <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-ink/50">Lessons</p>
           <ol className="flex flex-col gap-2">
             {module.lessons.map((l, i) => {
-              const active = l.slug === lessonSlug;
+              const active = l.slug === activeLessonSlug;
               const done = completedLessonIds.has(l.id);
               return (
                 <li key={l.slug}>
@@ -168,9 +167,11 @@ export function Module() {
         </aside>
 
         <article className="rounded-card border border-ink/10 bg-paper p-6 shadow-hard md:p-8">
-          {lessonError ? (
-            <p className="text-ink/60">Couldn’t load lesson ({lessonError}).</p>
-          ) : lesson ? (
+          {lessonQuery.isPending ? (
+            <p className="text-ink/60">Loading lesson…</p>
+          ) : lessonQuery.isError || !lesson ? (
+            <p className="text-ink/60">Couldn’t load lesson.</p>
+          ) : (
             <>
               <h2 className="font-display text-2xl font-bold tracking-tight">{lesson.title}</h2>
               <div className="md mt-4">
@@ -178,8 +179,8 @@ export function Module() {
               </div>
               <div className="mt-6 flex items-center gap-3">
                 <button
-                  onClick={completeLesson}
-                  disabled={completedLessonIds.has(activeLessonId!) || busy === 'lesson'}
+                  onClick={() => completeLesson.mutate(activeLessonId!)}
+                  disabled={completedLessonIds.has(activeLessonId!) || completeLesson.isPending}
                   className={`rounded-pill px-5 py-2 text-sm font-semibold transition-colors ${
                     completedLessonIds.has(activeLessonId!)
                       ? 'bg-leaf text-ink'
@@ -188,12 +189,12 @@ export function Module() {
                 >
                   {completedLessonIds.has(activeLessonId!)
                     ? 'Completed ✓'
-                    : 'Mark complete'}
+                    : completeLesson.isPending
+                      ? 'Marking…'
+                      : 'Mark complete'}
                 </button>
               </div>
             </>
-          ) : (
-            <p className="text-ink/60">Loading lesson…</p>
           )}
         </article>
       </div>
@@ -207,7 +208,7 @@ export function Module() {
               return (
                 <li key={item.id}>
                   <button
-                    onClick={() => toggleChecklist(item.id)}
+                    onClick={() => toggleChecklist.mutate(item.id)}
                     className="flex w-full items-start gap-3 text-left text-sm"
                   >
                     <span
@@ -229,75 +230,20 @@ export function Module() {
           </ul>
         </section>
 
-        <section className="rounded-card bg-leaf p-6 shadow-hard">
-          <h3 className="font-display text-lg font-bold">Quiz</h3>
-          {bestScore !== null && quizResult === null && (
-            <p className="mt-2 text-sm text-ink/70">Best score: {bestScore}%</p>
-          )}
-          {module.quiz ? (
-            <>
-              <ol className="mt-4 flex flex-col gap-4">
-                {module.quiz.questions.map((q, qi) => (
-                  <li key={q.id} className="text-sm">
-                    <p className="font-medium">{q.prompt}</p>
-                    <ul className="mt-2 flex flex-col gap-1">
-                      {q.options.map((opt, oi) => {
-                        const isSelected = selected[qi] === oi;
-                        const revealed = quizResult !== null;
-                        const isCorrect = revealed && quizResult.correct[qi];
-                        const wasWrongPick = revealed && isSelected && !quizResult.correct[qi];
-                        return (
-                          <li key={oi}>
-                            <button
-                              onClick={() =>
-                                setSelected((prev) =>
-                                  prev.map((v, i) => (i === qi ? oi : v)),
-                                )
-                              }
-                              disabled={revealed}
-                              className={`flex w-full items-center gap-2 rounded-md px-3 py-2 text-left transition-colors ${
-                                revealed && isCorrect
-                                  ? 'bg-forest/10 ring-1 ring-forest'
-                                  : wasWrongPick
-                                    ? 'bg-red-100 ring-1 ring-red-400'
-                                    : isSelected
-                                      ? 'bg-forest text-paper'
-                                      : 'bg-paper/60 hover:bg-paper'
-                              }`}
-                            >
-                              <span
-                                className={`h-3.5 w-3.5 shrink-0 rounded-full border-2 ${
-                                  isSelected ? 'border-paper' : 'border-ink/30'
-                                }`}
-                              />
-                              {opt}
-                            </button>
-                          </li>
-                        );
-                      })}
-                    </ul>
-                  </li>
-                ))}
-              </ol>
-              {quizResult ? (
-                <div className="mt-4 rounded-md bg-paper/70 p-3 text-sm font-semibold">
-                  You scored {quizResult.score} / {quizResult.total} (
-                  {Math.round((100 * quizResult.score) / quizResult.total)}%)
-                </div>
-              ) : (
-                <button
-                  onClick={submitQuiz}
-                  disabled={!quizComplete || busy === 'quiz'}
-                  className="mt-4 rounded-pill bg-forest px-5 py-2 text-sm font-semibold text-paper transition-colors hover:bg-forest/90 disabled:cursor-not-allowed disabled:opacity-40"
-                >
-                  {busy === 'quiz' ? 'Submitting…' : 'Submit quiz'}
-                </button>
-              )}
-            </>
-          ) : (
+        {module.quiz ? (
+          <QuizSection
+            key={module.quiz.id}
+            quizId={module.quiz.id}
+            quiz={module.quiz}
+            slug={slug ?? ''}
+            bestScore={bestScore}
+          />
+        ) : (
+          <section className="rounded-card bg-leaf p-6 shadow-hard">
+            <h3 className="font-display text-lg font-bold">Quiz</h3>
             <p className="mt-4 text-sm text-ink/70">No quiz for this module yet.</p>
-          )}
-        </section>
+          </section>
+        )}
       </div>
     </div>
   );

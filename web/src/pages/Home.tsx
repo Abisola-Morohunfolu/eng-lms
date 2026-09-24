@@ -1,5 +1,4 @@
 import { Button } from '../components/Button';
-import { Pill } from '../components/Pill';
 import { SubjectCard } from '../components/SubjectCard';
 import type { Track } from '../api/types';
 
@@ -38,7 +37,6 @@ export function Home() {
         <div className="pointer-events-none absolute -left-24 top-40 h-64 w-64 rounded-full bg-mist/60 blur-2xl" />
 
         <div className="wrap relative flex flex-col items-center gap-8 py-16 text-center md:py-28">
-          <Pill>Cloud · Auth · Databases</Pill>
           <h1 className="max-w-3xl font-display text-4xl font-bold leading-tight tracking-tight sm:text-5xl md:text-6xl">
             Learn the <span className="accent scribble">systems</span> behind modern software — by
             building them.

@@ -1,52 +1,30 @@
-import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { api } from '../api/client';
-import type { ProgressResponse, Track, TrackDetail } from '../api/types';
+import { ModuleCardShell } from '../components/ModuleCardShell';
 import { ProgressBar } from '../components/ProgressBar';
+import { Status } from '../components/Status';
 import { TrackIcon } from '../components/icons';
-
-const tones: Record<string, string> = {
-  'cloud-engineering': 'bg-mist',
-  'auth-engineering': 'bg-blush',
-  'database-engineering': 'bg-leaf',
-};
+import { useGetTrackDetails, useGetTracks } from '../hooks/content';
+import { useGetProgress } from '../hooks/progress';
 
 export function Dashboard() {
-  const [tracks, setTracks] = useState<Track[]>([]);
-  const [details, setDetails] = useState<Record<string, TrackDetail>>({});
-  const [percent, setPercent] = useState<Record<string, number>>({});
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const tracksQuery = useGetTracks();
+  const progressQuery = useGetProgress();
+  const detailsQueries = useGetTrackDetails(tracksQuery.data);
 
-  useEffect(() => {
-    Promise.all([api<Track[]>('/tracks'), api<ProgressResponse>('/me/progress')])
-      .then(async ([list, progress]) => {
-        setTracks(list);
-        setPercent(
-          Object.fromEntries(progress.modules.map((m) => [m.slug, m.percent])),
-        );
-        const entries = await Promise.all(
-          list.map((t) =>
-            api<TrackDetail>(`/tracks/${t.slug}`).then((d) => [t.slug, d] as const),
-          ),
-        );
-        setDetails(Object.fromEntries(entries));
-      })
-      .catch((e: Error) => setError(e.message))
-      .finally(() => setLoading(false));
-  }, []);
+  const isPending =
+    tracksQuery.isPending || progressQuery.isPending || detailsQueries.some((q) => q.isPending);
+  const isError =
+    tracksQuery.isError || progressQuery.isError || detailsQueries.some((q) => q.isError);
 
-  if (loading) {
-    return <p className="wrap py-24 text-center text-ink/60">Loading your tracks…</p>;
-  }
+  if (isPending) return <Status message="Loading your tracks…" />;
+  if (isError) return <Status message="Couldn’t load tracks." />;
 
-  if (error) {
-    return (
-      <p className="wrap py-24 text-center text-ink/60">
-        Couldn’t load tracks ({error}).
-      </p>
-    );
-  }
+  const tracks = tracksQuery.data ?? [];
+  const details = Object.fromEntries(
+    tracks.map((t, i) => [t.slug, detailsQueries[i]?.data] as const),
+  );
+  const percent = Object.fromEntries(
+    (progressQuery.data?.modules ?? []).map((m) => [m.slug, m.percent]),
+  );
 
   return (
     <div className="wrap flex flex-col gap-14 py-12 md:py-16">
@@ -65,11 +43,7 @@ export function Dashboard() {
           </div>
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {(details[track.slug]?.modules ?? []).map((m) => (
-              <Link
-                key={m.slug}
-                to={`/modules/${m.slug}`}
-                className={`flex flex-col gap-3 rounded-card p-5 shadow-hard ${tones[track.slug] ?? 'bg-mist'}`}
-              >
+              <ModuleCardShell key={m.slug} slug={track.slug} to={`/modules/${m.slug}`}>
                 <span className="text-xs font-semibold text-ink/50">
                   Module {String(m.order).padStart(2, '0')}
                 </span>
@@ -78,7 +52,7 @@ export function Dashboard() {
                 <div className="mt-auto pt-2">
                   <ProgressBar value={percent[m.slug] ?? 0} />
                 </div>
-              </Link>
+              </ModuleCardShell>
             ))}
           </div>
         </section>
