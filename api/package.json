@@ -9,7 +9,7 @@
     "format": "prettier --write \"src/**/*.ts\"",
     "start": "nest start",
     "start:dev": "nest start --watch",
-    "start:prod": "node dist/main",
+    "start:prod": "node dist/src/main",
     "postinstall": "prisma generate",
     "lint": "eslint \"src/**/*.ts\" --fix",
     "test": "jest",
